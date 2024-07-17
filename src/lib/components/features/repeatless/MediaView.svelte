@@ -49,7 +49,13 @@
 					class="aspect-[2/3] w-20 flex-none rounded bg-[var(--media-color)] object-cover object-center"
 				/>
 				<div class="flex flex-1 flex-col gap-2">
-					<h3 class="line-clamp-2 text-lg font-medium">{media.title.romaji}</h3>
+					<a
+						href="https://anilist.co/anime/{media.id}"
+						target="_blank"
+						class="line-clamp-2 text-lg font-medium"
+					>
+						{media.title.romaji}
+					</a>
 					<div class="flex gap-2">
 						{watchTime}
 						{#if diffTime}

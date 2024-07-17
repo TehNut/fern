@@ -22,7 +22,18 @@ export interface GraphQLData {
 }
 
 export interface MediaListCollection {
+	user: User;
 	lists: List[];
+}
+
+export interface User {
+	id: number;
+	name: string;
+	avatar: Avatar;
+}
+
+export interface Avatar {
+	large: string;
 }
 
 export interface List {
