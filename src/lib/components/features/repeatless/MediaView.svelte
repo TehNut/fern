@@ -32,7 +32,12 @@
 		</ToggleGroup.Root>
 	</div>
 	<Separator />
-	<VirtualList width="100%" height={600} itemCount={sorted.length} itemSize={128}>
+	<VirtualList
+		width="100%"
+		height={window.innerHeight - 384}
+		itemCount={sorted.length}
+		itemSize={128}
+	>
 		<div slot="item" let:index let:style {style}>
 			{@const { media, rewatches, time } = sorted[index]}
 			{@const watchTime = readableTime(parseSeconds(time.withoutRewatches * 60))}
