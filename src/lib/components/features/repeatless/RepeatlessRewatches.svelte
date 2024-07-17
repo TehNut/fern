@@ -8,10 +8,10 @@
 	import * as Card from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
-	import type { AniListResponse, CalculatedReponse } from "$lib/types";
+	import type { AniListResponse, CalculatedReponse, User } from "$lib/types";
 	import CalculatedView from "./CalculatedView.svelte";
 
-	let calculatePromise: Promise<CalculatedReponse> = null;
+	let calculatePromise: Promise<{ calculated: CalculatedReponse; user: User }> = null;
 	let username: string = null;
 
 	async function calculate() {
@@ -23,7 +23,7 @@
 					(e) => e.media.id
 				);
 				const watchTime = calculateWatchTime(entries);
-				resolve(watchTime);
+				resolve({ calculated: watchTime, user: data.MediaListCollection.user });
 			} catch (e) {
 				toast(`Error calculating watch time: ${e.message || String(e)}`);
 				reject("Uh-oh :(");
@@ -41,8 +41,8 @@
 		{#if calculatePromise}
 			{#await calculatePromise}
 				Calculating...
-			{:then calculated}
-				<CalculatedView {calculated} />
+			{:then { calculated, user }}
+				<CalculatedView {calculated} {user} />
 			{:catch}
 				<div class="grid gap-4">
 					<p>Uh-oh :(</p>

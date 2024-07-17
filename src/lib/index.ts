@@ -1,6 +1,6 @@
 import type { CalculatedReponse, MediaListEntry } from "./types";
 
-export async function calculateWatchTime(entries: MediaListEntry[]): Promise<CalculatedReponse> {
+export function calculateWatchTime(entries: MediaListEntry[]): CalculatedReponse {
 	const result: CalculatedReponse = {
 		time: {
 			withRewatches: 0,
@@ -49,6 +49,13 @@ export async function queryAniList<T>(query: string, variables: Record<string, a
 
 export const LIST_QUERY = `query ($username: String!) {
   MediaListCollection(userName: $username, type: ANIME, status_in: [ COMPLETED, CURRENT, DROPPED, PAUSED ]) {
+		user {
+      id
+      name
+      avatar {
+        large
+      }
+    }
     lists {
       entries {
         id
