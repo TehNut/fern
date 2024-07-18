@@ -7,6 +7,7 @@
 	import type { CalculatedReponse } from "$lib/types";
 	import { parseSeconds, readableTime } from "$lib/time";
 
+	export let totalTime: number;
 	export let calculated: CalculatedReponse["mediaTimes"];
 
 	let sortMode: "rewatches" | "diff" | "watchTime" = "rewatches";
@@ -58,10 +59,18 @@
 					</a>
 					<div class="flex gap-2">
 						{watchTime}
+						<Popover.Root>
+							<Popover.Trigger>
+								<Badge>{(time.withoutRewatches / totalTime).toPrecision(1)}%</Badge>
+							</Popover.Trigger>
+							<Popover.Content side="top">
+								<p>Percentage of total watch time</p>
+							</Popover.Content>
+						</Popover.Root>
 						{#if diffTime}
 							<Popover.Root>
 								<Popover.Trigger>
-									<Badge>+{diffTime} (x{rewatches})</Badge>
+									<Badge variant="secondary">+{diffTime} (x{rewatches})</Badge>
 								</Popover.Trigger>
 								<Popover.Content side="top">
 									<p>Time spent rewatching</p>

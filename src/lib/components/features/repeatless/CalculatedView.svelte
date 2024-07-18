@@ -55,6 +55,6 @@
 	</div>
 
 	<Collapsible.Content>
-		<MediaView calculated={calculated.mediaTimes} />
+		<MediaView calculated={calculated.mediaTimes} totalTime={calculated.time.withoutRewatches} />
 	</Collapsible.Content>
 </Collapsible.Root>
