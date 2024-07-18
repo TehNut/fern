@@ -61,7 +61,7 @@
 						{watchTime}
 						<Popover.Root>
 							<Popover.Trigger>
-								<Badge>{(time.withoutRewatches / totalTime).toPrecision(1)}%</Badge>
+								<Badge>{((time.withoutRewatches / totalTime) * 100).toPrecision(2)}%</Badge>
 							</Popover.Trigger>
 							<Popover.Content side="top">
 								<p>Percentage of total watch time</p>
