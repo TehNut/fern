@@ -1,0 +1,32 @@
+query RepeatlessWatchTimeMLC($username: String!) {
+  MediaListCollection(userName: $username, type: ANIME, status_in: [ COMPLETED, CURRENT, DROPPED, PAUSED ]) {
+		user {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+    lists {
+      entries {
+        id
+        status
+        progress
+        repeat
+        media {
+          id
+          title {
+            romaji
+          }
+          episodes
+          duration
+          siteUrl
+          coverImage {
+						color
+            extraLarge
+          }
+        }
+      }
+    }
+  }
+}

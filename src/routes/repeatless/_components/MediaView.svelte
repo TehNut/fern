@@ -4,8 +4,8 @@
 	import * as Popover from "$lib/components/ui/popover";
 	import * as ToggleGroup from "$lib/components/ui/toggle-group";
 	import { Separator } from "$lib/components/ui/separator";
-	import type { CalculatedReponse } from "$lib/types";
 	import { parseSeconds, readableTime } from "$lib/time";
+	import type { CalculatedReponse } from "../+page.svelte";
 
 	export let totalTime: number;
 	export let calculated: CalculatedReponse["mediaTimes"];

@@ -6,11 +6,11 @@
 	import * as Collapsible from "$lib/components/ui/collapsible";
 	import * as Popover from "$lib/components/ui/popover";
 	import { parseSeconds, readableTime } from "$lib/time";
-	import type { CalculatedReponse, User } from "$lib/types";
 	import MediaView from "./MediaView.svelte";
+	import type { CalculatedReponse, RepeatlessUser } from "../+page.svelte";
 
 	export let calculated: CalculatedReponse;
-	export let user: User;
+	export let user: RepeatlessUser;
 
 	$: watchTime = readableTime(parseSeconds(calculated.time.withoutRewatches * 60));
 	$: diffTime = readableTime(parseSeconds(calculated.time.diff * 60));

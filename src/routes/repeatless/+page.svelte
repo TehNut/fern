@@ -1,24 +1,52 @@
+<script lang="ts" context="module">
+	import type { RepeatlessWatchTimeMlcQuery } from "$lib/anilist";
+
+	export type RepeatlessUser = RepeatlessWatchTimeMlcQuery["MediaListCollection"]["user"];
+	export type RepeatlessMedia =
+		RepeatlessWatchTimeMlcQuery["MediaListCollection"]["lists"][0]["entries"][0]["media"];
+	export type CalculatedTime = {
+		withoutRewatches: number;
+		withRewatches: number;
+		diff: number;
+	};
+
+	export type CalculatedReponse = {
+		time: CalculatedTime;
+		mediaTimes: {
+			media: RepeatlessMedia;
+			rewatches: number;
+			time: CalculatedTime;
+		}[];
+	};
+</script>
+
 <script lang="ts">
 	import { unique } from "radash";
 	import { toast } from "svelte-sonner";
 	import CircleAlert from "lucide-svelte/icons/circle-alert";
-	import { calculateWatchTime, LIST_QUERY, queryAniList } from "$lib";
 	import * as Alert from "$lib/components/ui/alert";
 	import { Button } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
-	import type { AniListResponse, CalculatedReponse, User } from "$lib/types";
 	import CalculatedView from "./_components/CalculatedView.svelte";
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
+	import request from "graphql-request";
+	import { RepeatlessWatchTimeMlcDocument } from "$lib/anilist";
 
-	let calculatePromise: Promise<{ calculated: CalculatedReponse; user: User }> = null;
+	let calculatePromise: Promise<{
+		calculated: CalculatedReponse;
+		user: RepeatlessUser;
+	}> = null;
 	let username: string = null;
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
 			try {
-				const { data } = await queryAniList<AniListResponse>(LIST_QUERY, { username });
+				const data = await request<RepeatlessWatchTimeMlcQuery>(
+					"https://graphql.anilist.co",
+					RepeatlessWatchTimeMlcDocument
+				);
 				const entries = unique(
 					data.MediaListCollection.lists.flatMap((list) => list.entries),
 					(e) => e.media.id
@@ -31,17 +59,46 @@
 			}
 		});
 	}
+
+	export function calculateWatchTime(
+		entries: RepeatlessWatchTimeMlcQuery["MediaListCollection"]["lists"][0]["entries"]
+	): CalculatedReponse {
+		const result: CalculatedReponse = {
+			time: {
+				withRewatches: 0,
+				withoutRewatches: 0,
+				diff: 0
+			},
+			mediaTimes: []
+		};
+
+		for (const entry of entries) {
+			const withRewatches =
+				(entry.repeat * entry.media.episodes + entry.progress) * entry.media.duration;
+			const withoutRewatches = entry.progress * entry.media.duration;
+			const diff = withRewatches - withoutRewatches;
+
+			result.time.withRewatches += withRewatches;
+			result.time.withoutRewatches += withoutRewatches;
+			result.time.diff += diff;
+			result.mediaTimes.push({
+				media: entry.media,
+				rewatches: entry.repeat,
+				time: {
+					withRewatches,
+					withoutRewatches,
+					diff
+				}
+			});
+		}
+
+		return result;
+	}
 </script>
 
 <FeatureWrapper>
-	<Card.Root class="relative w-full max-w-lg overflow-hidden">
-		<div
-			class="absolute inset-0 h-2/5 max-h-52 bg-cover bg-center"
-			style="background-image: url(https://s4.anilist.co/file/anilistcdn/media/anime/banner/21519-1ayMXgNlmByb.jpg);"
-		>
-			<div class="absolute inset-0 bg-gradient-to-b from-black/30 to-black backdrop-blur-sm" />
-		</div>
-		<Card.Header class="relative">
+	<Card.Root class="w-full max-w-lg overflow-hidden">
+		<Card.Header>
 			<Card.Title>Repeatless Watch Time</Card.Title>
 			<Card.Description class="text-card-foreground">
 				Calculate your total watch time excluding rewatches.

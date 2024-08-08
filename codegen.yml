@@ -1,0 +1,13 @@
+schema: https://graphql.anilist.co
+documents: "./src/**/*.graphql"
+config:
+  namingConvention:
+    enumValues: keep
+generates:
+  ./src/lib/anilist.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typed-document-node
+    config:
+      useTypeImports: true
