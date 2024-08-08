@@ -45,7 +45,10 @@
 			try {
 				const data = await request<RepeatlessWatchTimeMlcQuery>(
 					"https://graphql.anilist.co",
-					RepeatlessWatchTimeMlcDocument
+					RepeatlessWatchTimeMlcDocument,
+					{
+						username
+					}
 				);
 				const entries = unique(
 					data.MediaListCollection.lists.flatMap((list) => list.entries),
