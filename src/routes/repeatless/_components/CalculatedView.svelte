@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
-	import * as Avatar from "$lib/components/ui/avatar";
+	import UserHeader from "$lib/components/UserHeader.svelte";
 	import { Badge } from "$lib/components/ui/badge";
 	import { Button } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
@@ -17,43 +17,27 @@
 </script>
 
 <Collapsible.Root class="grid gap-4">
-	<div class="flex items-center gap-4">
-		<a href="https://anilist.co/user/{user.name}" target="_blank">
-			<Avatar.Root>
-				<Avatar.Image
-					src={user.avatar.large}
-					alt="Profile picture"
-					class="object-cover object-center"
-				/>
-				<Avatar.Fallback class="animate-pulse bg-popover-foreground/10" />
-			</Avatar.Root>
-		</a>
-		<div class="flex w-full flex-col">
-			<a href="https://anilist.co/user/{user.name}" target="_blank" class="text-lg font-bold">
-				{user.name}
-			</a>
-			<div class="flex items-center justify-between">
-				<div class="flex gap-2">
-					<p>{watchTime}</p>
-					<Popover.Root>
-						<Popover.Trigger>
-							<Badge>+{diffTime}</Badge>
-						</Popover.Trigger>
-						<Popover.Content side="top">
-							<p>Time spent rewatching</p>
-						</Popover.Content>
-					</Popover.Root>
-				</div>
-				<Collapsible.Trigger asChild let:builder>
-					<Button builders={[builder]} variant="ghost" size="icon" class="h-8 w-8">
-						<ChevronsUpDown />
-						<span class="sr-only">Toggle</span>
-					</Button>
-				</Collapsible.Trigger>
-			</div>
+	<UserHeader name={user.name} avatar={user.avatar.large}>
+		<div class="flex gap-2" slot="below-name">
+			<p>{watchTime}</p>
+			<Popover.Root>
+				<Popover.Trigger>
+					<Badge>+{diffTime}</Badge>
+				</Popover.Trigger>
+				<Popover.Content side="top">
+					<p>Time spent rewatching</p>
+				</Popover.Content>
+			</Popover.Root>
 		</div>
-	</div>
-
+		<svelte:fragment slot="actions">
+			<Collapsible.Trigger asChild let:builder>
+				<Button builders={[builder]} variant="ghost" size="icon" class="h-8 w-8">
+					<ChevronsUpDown />
+					<span class="sr-only">Toggle</span>
+				</Button>
+			</Collapsible.Trigger>
+		</svelte:fragment>
+	</UserHeader>
 	<Collapsible.Content>
 		<MediaView calculated={calculated.mediaTimes} totalTime={calculated.time.withoutRewatches} />
 	</Collapsible.Content>

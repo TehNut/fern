@@ -1,120 +1,74 @@
 <script lang="ts" context="module">
-	import type { RepeatlessWatchTimeMlcQuery } from "$lib/anilist";
+	import { MediaType, type InactiveMediaMlcQuery } from "$lib/anilist";
 
-	export type RepeatlessUser = RepeatlessWatchTimeMlcQuery["MediaListCollection"]["user"];
-	export type RepeatlessMedia =
-		RepeatlessWatchTimeMlcQuery["MediaListCollection"]["lists"][0]["entries"][0]["media"];
-	export type CalculatedTime = {
-		withoutRewatches: number;
-		withRewatches: number;
-		diff: number;
-	};
-
-	export type CalculatedReponse = {
-		time: CalculatedTime;
-		mediaTimes: {
-			media: RepeatlessMedia;
-			rewatches: number;
-			time: CalculatedTime;
-		}[];
-	};
+	export type InactiveEntry =
+		InactiveMediaMlcQuery["MediaListCollection"]["lists"][0]["entries"][0];
+	export type InactiveMediaUser = InactiveMediaMlcQuery["MediaListCollection"]["user"];
 </script>
 
 <script lang="ts">
-	import request from "graphql-request";
 	import { unique } from "radash";
+	import request from "graphql-request";
 	import { toast } from "svelte-sonner";
 	import CircleAlert from "lucide-svelte/icons/circle-alert";
+	import { InactiveMediaMlcDocument } from "$lib/anilist";
 	import * as Alert from "$lib/components/ui/alert";
 	import { Button } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
-	import CalculatedView from "./_components/CalculatedView.svelte";
+	import * as Tabs from "$lib/components/ui/tabs";
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
-	import { RepeatlessWatchTimeMlcDocument } from "$lib/anilist";
+	import InactiveView from "./_components/InactiveView.svelte";
 
 	let calculatePromise: Promise<{
-		calculated: CalculatedReponse;
-		user: RepeatlessUser;
+		entries: InactiveEntry[];
+		user: InactiveMediaUser;
 	}> = null;
 	let username: string = null;
+	let mediaType: MediaType = MediaType.ANIME;
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
 			try {
-				const data = await request<RepeatlessWatchTimeMlcQuery>(
+				const data = await request<InactiveMediaMlcQuery>(
 					"https://graphql.anilist.co",
-					RepeatlessWatchTimeMlcDocument,
+					InactiveMediaMlcDocument,
 					{
-						username
+						username,
+						type: mediaType
 					}
 				);
 				const entries = unique(
 					data.MediaListCollection.lists.flatMap((list) => list.entries),
-					(e) => e.media.id
+					(m) => m.media.id
 				);
-				const watchTime = calculateWatchTime(entries);
-				resolve({ calculated: watchTime, user: data.MediaListCollection.user });
+
+				resolve({ entries, user: data.MediaListCollection.user });
 			} catch (e) {
 				toast(`Error calculating watch time: ${e.message || String(e)}`);
 				reject("Uh-oh :(");
 			}
 		});
 	}
-
-	export function calculateWatchTime(
-		entries: RepeatlessWatchTimeMlcQuery["MediaListCollection"]["lists"][0]["entries"]
-	): CalculatedReponse {
-		const result: CalculatedReponse = {
-			time: {
-				withRewatches: 0,
-				withoutRewatches: 0,
-				diff: 0
-			},
-			mediaTimes: []
-		};
-
-		for (const entry of entries) {
-			const withRewatches =
-				(entry.repeat * entry.media.episodes + entry.progress) * entry.media.duration;
-			const withoutRewatches = entry.progress * entry.media.duration;
-			const diff = withRewatches - withoutRewatches;
-
-			result.time.withRewatches += withRewatches;
-			result.time.withoutRewatches += withoutRewatches;
-			result.time.diff += diff;
-			result.mediaTimes.push({
-				media: entry.media,
-				rewatches: entry.repeat,
-				time: {
-					withRewatches,
-					withoutRewatches,
-					diff
-				}
-			});
-		}
-
-		return result;
-	}
 </script>
 
 <FeatureWrapper>
 	<Card.Root class="w-full max-w-lg overflow-hidden">
 		<Card.Header>
-			<Card.Title>Repeatless Watch Time</Card.Title>
+			<Card.Title>Inactive Entries</Card.Title>
 			<Card.Description class="text-card-foreground">
-				Calculate your total watch time excluding rewatches.
+				Find list entries that have not been updated in a while.
 			</Card.Description>
 		</Card.Header>
 		<Card.Content class="relative">
 			{#if calculatePromise}
 				{#await calculatePromise}
 					Calculating...
-				{:then { calculated, user }}
-					<CalculatedView {calculated} {user} />
+				{:then { entries, user }}
+					<InactiveView {entries} {user} />
 				{:catch}
-					<div class="grid gap-4">
+					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
 						<Button variant="destructive" on:click={() => (calculatePromise = null)}>Reset</Button>
 					</div>
@@ -142,6 +96,16 @@
 							data-1p-ignore
 							data-lpignore
 						/>
+					</div>
+
+					<div class="flex w-full flex-col space-y-1">
+						<Label for="mediaType">Media Type</Label>
+						<Tabs.Root bind:value={mediaType} class="w-full">
+							<Tabs.List class="grid w-full grid-cols-2">
+								<Tabs.Trigger value={MediaType.ANIME}>Anime</Tabs.Trigger>
+								<Tabs.Trigger value={MediaType.MANGA}>Manga</Tabs.Trigger>
+							</Tabs.List>
+						</Tabs.Root>
 					</div>
 				</div>
 			{/if}

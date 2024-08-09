@@ -6,6 +6,11 @@
 			name: "Repeatless Watch Time",
 			description: "Calculate your total watch time excluding rewatches.",
 			path: "/repeatless"
+		},
+		{
+			name: "Find Inactive",
+			description: "Find media that has not been updated in a while.",
+			path: "/inactive"
 		}
 	];
 </script>

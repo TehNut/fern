@@ -1,0 +1,30 @@
+query InactiveMediaMLC($username: String!, $type: MediaType!) {
+  MediaListCollection(userName: $username, type: $type) {
+    user {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+    lists {
+      entries {
+        id
+        status
+        progress
+        updatedAt
+        media {
+          id
+          title {
+            romaji
+          }
+          siteUrl
+          coverImage {
+            color
+            extraLarge
+          }
+        }
+      }
+    }
+  }
+}
