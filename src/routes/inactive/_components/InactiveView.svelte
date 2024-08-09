@@ -33,7 +33,8 @@
 		.filter(
 			(e) => Date.now() - new Date(e.updatedAt * 1000).getTime() > getInactiveOffset(inactiveCutoff)
 		)
-		.filter((e) => includeStatus.includes(e.status));
+		.filter((e) => includeStatus.includes(e.status))
+		.sort((a, b) => a.updatedAt - b.updatedAt);
 
 	function getInactiveOffset(cutoff: typeof inactiveCutoff) {
 		switch (cutoff.value) {
