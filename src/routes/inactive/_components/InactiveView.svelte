@@ -26,7 +26,6 @@
 	let includeStatus: MediaListStatus[] = [
 		MediaListStatus.CURRENT,
 		MediaListStatus.REPEATING,
-		MediaListStatus.PLANNING,
 		MediaListStatus.PAUSED
 	];
 
