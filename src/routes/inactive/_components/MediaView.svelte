@@ -1,6 +1,7 @@
 <script lang="ts">
 	import VirtualList from "svelte-tiny-virtual-list";
 	import { parseSeconds, readableTime } from "$lib/time";
+	import { Badge } from "$lib/components/ui/badge";
 	import type { InactiveEntry } from "../+page.svelte";
 
 	export let entries: InactiveEntry[];
@@ -13,7 +14,7 @@
 	itemSize={128}
 >
 	<div slot="item" let:index let:style {style}>
-		{@const { media, updatedAt } = entries[index]}
+		{@const { media, updatedAt, status } = entries[index]}
 		{@const lastUpdated = readableTime(
 			parseSeconds(Math.floor(Date.now() / 1000) - updatedAt, true),
 			{ includeWeeks: true }
@@ -38,6 +39,7 @@
 					</span>
 					<span class="text-xs">since last update</span>
 				</div>
+				<Badge class="w-max font-medium">{status}</Badge>
 			</div>
 		</div>
 	</div>
