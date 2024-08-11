@@ -150,7 +150,7 @@
 			case MediaListStatus.DROPPED:
 				return "Dropped";
 			case MediaListStatus.PLANNING:
-				return "Plan to Watch";
+				return mediaType === MediaType.ANIME ? "Plan to Watch" : "Plan to Read";
 			default:
 				return "";
 		}
