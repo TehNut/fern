@@ -4,6 +4,12 @@
 
 	const features = [
 		{
+			name: "List Export",
+			description: "Export your anime or manga list from AniList to a MAL compatible XML file.",
+			path: "/export",
+			isNew: true
+		},
+		{
 			name: "Repeatless Watch Time",
 			description: "Calculate your total watch time excluding rewatches.",
 			path: "/repeatless",
@@ -13,13 +19,13 @@
 			name: "Find Inactive",
 			description: "Find media that has not been updated in a while.",
 			path: "/inactive",
-			isNew: true
+			isNew: false
 		}
 	];
 </script>
 
 <svelte:head>
-	<title>Fern</title>
+	<title>Fern | Spellbook</title>
 </svelte:head>
 
 <div class="mx-auto flex w-11/12 flex-col gap-4 xl:w-2/3">
