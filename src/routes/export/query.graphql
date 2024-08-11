@@ -1,0 +1,44 @@
+query GetExportListMLC($username: String!, $type: MediaType!) {
+  MediaListCollection(userName: $username, type: $type) {
+		user {
+      id
+      name
+      avatar {
+        large
+      }
+    }
+    lists {
+      entries {
+        progress
+        progressVolumes
+        status
+        repeat
+        score(format: POINT_10)
+        notes
+        startedAt {
+          day
+          month
+          year
+        }
+        completedAt {
+          day
+          month
+          year
+        }
+        media {
+          id
+          idMal
+          episodes
+          volumes
+          title {
+            romaji
+          }
+          coverImage {
+            color
+            extraLarge
+          }
+        }
+      }
+    }
+  }
+}

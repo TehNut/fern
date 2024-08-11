@@ -33,6 +33,7 @@
 	import CalculatedView from "./_components/CalculatedView.svelte";
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
 	import { RepeatlessWatchTimeMlcDocument } from "$lib/anilist";
+	import { Repeat } from "lucide-svelte";
 
 	let calculatePromise: Promise<{
 		calculated: CalculatedReponse;
@@ -98,6 +99,10 @@
 		return result;
 	}
 </script>
+
+<svelte:head>
+	<title>Fern | Repeatless Watch Time</title>
+</svelte:head>
 
 <FeatureWrapper>
 	<Card.Root class="w-full max-w-lg overflow-hidden">

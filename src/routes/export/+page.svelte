@@ -1,39 +1,40 @@
 <script lang="ts" context="module">
-	import { MediaType, type InactiveMediaMlcQuery } from "$lib/anilist";
+	import type { GetExportListMlcQuery } from "$lib/anilist";
 
-	export type InactiveEntry =
-		InactiveMediaMlcQuery["MediaListCollection"]["lists"][0]["entries"][0];
-	export type InactiveMediaUser = InactiveMediaMlcQuery["MediaListCollection"]["user"];
+	export type ExportUser = GetExportListMlcQuery["MediaListCollection"]["user"];
+	export type ExportEntry = GetExportListMlcQuery["MediaListCollection"]["lists"][0]["entries"][0];
 </script>
 
 <script lang="ts">
-	import { unique } from "radash";
 	import request from "graphql-request";
 	import { toast } from "svelte-sonner";
 	import CircleAlert from "lucide-svelte/icons/circle-alert";
-	import { InactiveMediaMlcDocument } from "$lib/anilist";
+	import { MediaType, GetExportListMlcDocument } from "$lib/anilist";
+	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
 	import * as Alert from "$lib/components/ui/alert";
 	import { Button } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
+	import { Switch } from "$lib/components/ui/switch";
 	import * as Tabs from "$lib/components/ui/tabs";
-	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
-	import InactiveView from "./_components/InactiveView.svelte";
+	import { unique } from "radash";
+	import ListExportView from "./_components/ListExportView.svelte";
 
 	let calculatePromise: Promise<{
-		entries: InactiveEntry[];
-		user: InactiveMediaUser;
+		user: ExportUser;
+		entries: ExportEntry[];
 	}> = null;
 	let username: string = null;
 	let mediaType: MediaType = MediaType.ANIME;
+	let updateOnImport: boolean = false;
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
 			try {
-				const data = await request<InactiveMediaMlcQuery>(
+				const data = await request<GetExportListMlcQuery>(
 					"https://graphql.anilist.co",
-					InactiveMediaMlcDocument,
+					GetExportListMlcDocument,
 					{
 						username,
 						type: mediaType
@@ -41,12 +42,12 @@
 				);
 				const entries = unique(
 					data.MediaListCollection.lists.flatMap((list) => list.entries),
-					(m) => m.media.id
+					(e) => e.media.id
 				);
 
-				resolve({ entries, user: data.MediaListCollection.user });
+				resolve({ user: data.MediaListCollection.user, entries });
 			} catch (e) {
-				toast(`Error calculating watch time: ${e.message || String(e)}`);
+				toast(`Error fetching list: ${e.message || String(e)}`);
 				reject("Uh-oh :(");
 			}
 		});
@@ -54,23 +55,23 @@
 </script>
 
 <svelte:head>
-	<title>Fern | Inactive Entries</title>
+	<title>Fern | List Export</title>
 </svelte:head>
 
 <FeatureWrapper>
 	<Card.Root class="w-full max-w-lg overflow-hidden">
 		<Card.Header>
-			<Card.Title>Inactive Entries</Card.Title>
+			<Card.Title>List Export</Card.Title>
 			<Card.Description class="text-card-foreground">
-				Find list entries that have not been updated in a while.
+				Export your anime or manga list from AniList to a MAL compatible XML file.
 			</Card.Description>
 		</Card.Header>
 		<Card.Content class="relative">
 			{#if calculatePromise}
 				{#await calculatePromise}
-					Calculating...
-				{:then { entries, user }}
-					<InactiveView {entries} {user} />
+					Fetching list...
+				{:then { user, entries }}
+					<ListExportView {user} {entries} {mediaType} {updateOnImport} />
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
@@ -88,6 +89,15 @@
 								<li>If your account is private, your list cannot be fetched.</li>
 								<li>If you have private entries, they will not be accounted for.</li>
 							</ul>
+						</Alert.Description>
+					</Alert.Root>
+
+					<Alert.Root>
+						<CircleAlert class="size-4" />
+						<Alert.Title>Lossy process</Alert.Title>
+						<Alert.Description>
+							Exports like this are not completely accurate. Certain data, such as custom lists,
+							will be lost.
 						</Alert.Description>
 					</Alert.Root>
 
@@ -111,12 +121,17 @@
 							</Tabs.List>
 						</Tabs.Root>
 					</div>
+
+					<div class="flex w-full items-center gap-4">
+						<Switch bind:checked={updateOnImport} />
+						<Label for="mediaType">Update on import</Label>
+					</div>
 				</div>
 			{/if}
 		</Card.Content>
 		<Card.Footer>
 			{#if calculatePromise === null}
-				<Button on:click={calculate} disabled={!username}>Calculate</Button>
+				<Button on:click={calculate} disabled={!username}>Export</Button>
 			{:else}
 				<Button
 					on:click={() => {

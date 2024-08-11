@@ -44,6 +44,7 @@
 	"dependencies": {
 		"bits-ui": "^0.21.12",
 		"clsx": "^2.1.1",
+		"fast-xml-parser": "^4.4.1",
 		"graphql-request": "^7.1.0",
 		"lucide-svelte": "^0.408.0",
 		"mode-watcher": "^0.4.0",
