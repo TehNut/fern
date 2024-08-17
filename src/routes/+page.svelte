@@ -7,13 +7,20 @@
 			name: "List Export",
 			description: "Export your anime or manga list from AniList to a MAL compatible XML file.",
 			path: "/export",
-			isNew: true
+			isNew: false
 		},
 		{
 			name: "Repeatless Watch Time",
 			description: "Calculate your total watch time excluding rewatches.",
 			path: "/repeatless",
 			isNew: false
+		},
+		{
+			name: "Activity Finder",
+			description:
+				"Find past activities for specific media or view a specific time period of activity.",
+			path: "/activity-finder",
+			isNew: true
 		},
 		{
 			name: "Find Inactive",

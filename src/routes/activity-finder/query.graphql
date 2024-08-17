@@ -1,0 +1,50 @@
+query ActivityMediaSearch($search: String!, $type: MediaType) {
+  Page {
+    media(search: $search, type: $type) {
+      id
+      title {
+        romaji
+      }
+      coverImage {
+        large
+      }
+    }
+  }
+}
+
+query GetUser($name: String!) {
+  User(name: $name) {
+    id
+    name
+    avatar {
+      large
+    }
+  }
+}
+
+query ActivitySearch($page: Int = 1, $userId: Int!, $mediaId: Int, $createdLesser: Int, $createdGreater: Int) {
+  Page(page: $page) {
+    pageInfo {
+      hasNextPage
+    }
+    activities(type: MEDIA_LIST, userId: $userId, mediaId: $mediaId, createdAt_lesser: $createdLesser, createdAt_greater: $createdGreater) {
+      ...on ListActivity {
+        id
+        createdAt
+        progress
+        status
+        media {
+          id
+          type
+          title {
+            romaji
+          }
+          coverImage {
+            extraLarge
+            color
+          }
+        }
+      }
+    }
+  }
+}
