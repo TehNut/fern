@@ -49,10 +49,12 @@
 					page,
 					userId: user.id,
 					mediaId,
-					createdLesser: Math.floor(
-						value.end.toDate(getLocalTimeZone()).getTime() / 1000 + 60 * 60 * 24
-					),
-					createdGreater: Math.floor(value.start.toDate(getLocalTimeZone()).getTime() / 1000)
+					createdLesser: value
+						? Math.floor(value.end.toDate(getLocalTimeZone()).getTime() / 1000 + 60 * 60 * 24)
+						: undefined,
+					createdGreater: value
+						? Math.floor(value.start.toDate(getLocalTimeZone()).getTime() / 1000)
+						: undefined
 				}
 			);
 			page++;
