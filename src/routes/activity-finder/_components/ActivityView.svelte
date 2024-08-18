@@ -17,13 +17,12 @@
 	import { Button } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
 	import type { ListActivity } from "../+page.svelte";
-	import Alert from "$lib/components/ui/alert/alert.svelte";
 
 	export let activities: ListActivity[];
 	export let user: GetUserQuery["User"];
 	export let value: DateRange;
 	export let hasMore = true;
-	export let mediaId: number | undefined = undefined;
+	export let mediaId: string | undefined = undefined;
 
 	const df = new DateFormatter((browser && navigator.languages[0]) || "en-US", {
 		dateStyle: "short"
@@ -49,7 +48,7 @@
 				{
 					page,
 					userId: user.id,
-					mediaId, // TODO
+					mediaId,
 					createdLesser: Math.floor(
 						value.end.toDate(getLocalTimeZone()).getTime() / 1000 + 60 * 60 * 24
 					),
@@ -70,14 +69,21 @@
 <Collapsible.Root class="grid gap-4">
 	<UserHeader name={user.name} avatar={user.avatar.large}>
 		<div class="flex gap-2" slot="below-name">
-			{#if value.start.compare(value.end) === 0}
-				These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created on
-				{df.format(value.start.toDate(getLocalTimeZone()))}.
+			{#if value}
+				{#if value.start.compare(value.end) === 0}
+					These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
+					on
+					{df.format(value.start.toDate(getLocalTimeZone()))}.
+				{:else}
+					These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
+					between
+					{df.format(value.start.toDate(getLocalTimeZone()))}
+					and
+					{df.format(value.end.toDate(getLocalTimeZone()))}.
+				{/if}
 			{:else}
-				These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created between
-				{df.format(value.start.toDate(getLocalTimeZone()))}
-				and
-				{df.format(value.end.toDate(getLocalTimeZone()))}.
+				These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created for
+				this media.
 			{/if}
 		</div>
 		<svelte:fragment slot="actions">
@@ -126,7 +132,8 @@
 									{activity.media.title.romaji}
 								</a>
 							</p>
-							<div class="flex h-10 flex-none items-center justify-between px-4">
+							<div class="flex h-10 flex-none items-center justify-between pr-4">
+								<p class="text-sm">{dfTime.format(new Date(activity.createdAt * 1000))}</p>
 								<Button
 									href="https://anilist.co/activity/{activity.id}"
 									variant="ghost"
@@ -135,7 +142,6 @@
 								>
 									<ExternalLink />
 								</Button>
-								<p class="text-sm">{dfTime.format(new Date(activity.createdAt * 1000))}</p>
 							</div>
 						</div>
 					</div>

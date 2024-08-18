@@ -31,6 +31,8 @@
 	import * as Tabs from "$lib/components/ui/tabs";
 	import ActivityView from "./_components/ActivityView.svelte";
 	import { browser } from "$app/environment";
+	import MediaSearch from "./_components/MediaSearch.svelte";
+	import Switch from "$lib/components/ui/switch/switch.svelte";
 
 	const rangeStart = today(getLocalTimeZone());
 	const rangeEnd = rangeStart;
@@ -44,6 +46,8 @@
 		hasMore: boolean;
 	}> = null;
 	let username: string = null;
+	let mediaTypeIsManga = false;
+	let mediaId: string | undefined = undefined;
 	let selectionType: "time" | "media" = "time";
 	let value: DateRange | undefined = {
 		start: rangeStart,
@@ -67,11 +71,15 @@
 					{
 						page: 1,
 						userId: userData.User.id,
-						mediaId: undefined, // TODO
-						createdLesser: Math.floor(
-							value.end.toDate(getLocalTimeZone()).getTime() / 1000 + 60 * 60 * 24
-						),
-						createdGreater: Math.floor(value.start.toDate(getLocalTimeZone()).getTime() / 1000)
+						mediaId: selectionType === "media" ? mediaId : undefined,
+						createdLesser:
+							selectionType === "time"
+								? Math.floor(value.end.toDate(getLocalTimeZone()).getTime() / 1000 + 60 * 60 * 24)
+								: undefined,
+						createdGreater:
+							selectionType === "time"
+								? Math.floor(value.start.toDate(getLocalTimeZone()).getTime() / 1000)
+								: undefined
 					}
 				);
 
@@ -105,7 +113,13 @@
 				{#await calculatePromise}
 					Fetching activities...
 				{:then { activities, user, hasMore }}
-					<ActivityView {activities} {user} {hasMore} {value} />
+					<ActivityView
+						{activities}
+						{user}
+						{hasMore}
+						value={selectionType === "time" ? value : undefined}
+						mediaId={selectionType === "media" ? mediaId : undefined}
+					/>
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
@@ -142,7 +156,7 @@
 						<Tabs.Root bind:value={selectionType} class="w-full">
 							<Tabs.List class="mb-4 grid w-full grid-cols-2">
 								<Tabs.Trigger value="time">Date Range</Tabs.Trigger>
-								<Tabs.Trigger value="media" disabled>Media</Tabs.Trigger>
+								<Tabs.Trigger value="media">Media</Tabs.Trigger>
 							</Tabs.List>
 							<Tabs.Content value="time">
 								<div class="flex flex-col space-y-1">
@@ -172,7 +186,25 @@
 									</Popover.Root>
 								</div>
 							</Tabs.Content>
-							<Tabs.Content value="media">TODO</Tabs.Content>
+							<Tabs.Content value="media">
+								<div class="flex flex-col gap-4">
+									<div class="flex gap-2">
+										<p>Anime</p>
+										<Switch
+											bind:checked={mediaTypeIsManga}
+											class="data-[state=unchecked]:bg-primary"
+										/>
+										<p>Manga</p>
+									</div>
+									<div class="flex flex-col space-y-1">
+										<Label>Search</Label>
+										<MediaSearch
+											bind:value={mediaId}
+											mediaType={mediaTypeIsManga ? MediaType.MANGA : MediaType.ANIME}
+										/>
+									</div>
+								</div>
+							</Tabs.Content>
 						</Tabs.Root>
 					</div>
 				</div>
