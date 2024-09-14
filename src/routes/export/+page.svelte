@@ -27,6 +27,7 @@
 	}> = null;
 	let username: string = null;
 	let mediaType: MediaType = MediaType.ANIME;
+	let exportFormat: "mal" | "csv" = "mal";
 	let updateOnImport: boolean = false;
 
 	async function calculate() {
@@ -37,7 +38,8 @@
 					GetExportListMlcDocument,
 					{
 						username,
-						type: mediaType
+						type: mediaType,
+						scoreFormat: exportFormat === "csv" ? "POINT_100" : "POINT_10"
 					}
 				);
 				const entries = unique(
@@ -63,7 +65,7 @@
 		<Card.Header>
 			<Card.Title>List Export</Card.Title>
 			<Card.Description class="text-card-foreground">
-				Export your anime or manga list from AniList to a MAL compatible XML file.
+				Export your anime or manga list from AniList to a MAL compatible XML file or CSV.
 			</Card.Description>
 		</Card.Header>
 		<Card.Content class="relative">
@@ -71,7 +73,7 @@
 				{#await calculatePromise}
 					Fetching list...
 				{:then { user, entries }}
-					<ListExportView {user} {entries} {mediaType} {updateOnImport} />
+					<ListExportView {user} {entries} {mediaType} {updateOnImport} {exportFormat} />
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
@@ -113,6 +115,16 @@
 					</div>
 
 					<div class="flex w-full flex-col space-y-1">
+						<Label for="exportFormat">Export Format</Label>
+						<Tabs.Root bind:value={exportFormat} class="w-full">
+							<Tabs.List class="grid w-full grid-cols-2">
+								<Tabs.Trigger value="mal">MyAnimeList</Tabs.Trigger>
+								<Tabs.Trigger value="csv">CSV</Tabs.Trigger>
+							</Tabs.List>
+						</Tabs.Root>
+					</div>
+
+					<div class="flex w-full flex-col space-y-1">
 						<Label for="mediaType">Media Type</Label>
 						<Tabs.Root bind:value={mediaType} class="w-full">
 							<Tabs.List class="grid w-full grid-cols-2">
@@ -122,10 +134,12 @@
 						</Tabs.Root>
 					</div>
 
-					<div class="flex w-full items-center gap-4">
-						<Switch bind:checked={updateOnImport} />
-						<Label for="mediaType">Update on import</Label>
-					</div>
+					{#if exportFormat !== "csv"}
+						<div class="flex w-full items-center gap-4">
+							<Switch bind:checked={updateOnImport} />
+							<Label for="updateOnImport">Update on import</Label>
+						</div>
+					{/if}
 				</div>
 			{/if}
 		</Card.Content>

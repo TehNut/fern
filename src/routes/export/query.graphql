@@ -1,4 +1,4 @@
-query GetExportListMLC($username: String!, $type: MediaType!) {
+query GetExportListMLC($username: String!, $type: MediaType!, $scoreFormat: ScoreFormat = POINT_10) {
   MediaListCollection(userName: $username, type: $type) {
 		user {
       id
@@ -13,7 +13,7 @@ query GetExportListMLC($username: String!, $type: MediaType!) {
         progressVolumes
         status
         repeat
-        score(format: POINT_10)
+        score(format: $scoreFormat)
         notes
         startedAt {
           day
@@ -28,6 +28,7 @@ query GetExportListMLC($username: String!, $type: MediaType!) {
         media {
           id
           idMal
+          format
           episodes
           volumes
           title {
