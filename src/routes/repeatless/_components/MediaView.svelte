@@ -7,20 +7,26 @@
 	import { parseSeconds, readableTime } from "$lib/time";
 	import type { CalculatedReponse } from "../+page.svelte";
 
-	export let totalTime: number;
-	export let calculated: CalculatedReponse["mediaTimes"];
+	interface Props {
+		totalTime: number;
+		calculated: CalculatedReponse["mediaTimes"];
+	}
 
-	let sortMode: "rewatches" | "diff" | "watchTime" = "rewatches";
-	$: sorted = calculated.toSorted((e1, e2) => {
-		switch (sortMode) {
-			case "diff":
-				return e2.time.diff - e1.time.diff;
-			case "rewatches":
-				return e2.rewatches - e1.rewatches;
-			case "watchTime":
-				return e2.time.withoutRewatches - e1.time.withoutRewatches;
-		}
-	});
+	let { totalTime, calculated }: Props = $props();
+
+	let sortMode: "rewatches" | "diff" | "watchTime" = $state("rewatches");
+	let sorted = $derived(
+		calculated.toSorted((e1, e2) => {
+			switch (sortMode) {
+				case "diff":
+					return e2.time.diff - e1.time.diff;
+				case "rewatches":
+					return e2.rewatches - e1.rewatches;
+				case "watchTime":
+					return e2.time.withoutRewatches - e1.time.withoutRewatches;
+			}
+		})
+	);
 </script>
 
 <div class="grid gap-2">

@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { GetExportListMlcQuery } from "$lib/anilist";
 
 	export type ExportUser = GetExportListMlcQuery["MediaListCollection"]["user"];
@@ -24,11 +24,11 @@
 	let calculatePromise: Promise<{
 		user: ExportUser;
 		entries: ExportEntry[];
-	}> = null;
-	let username: string = null;
-	let mediaType: MediaType = MediaType.ANIME;
-	let exportFormat: "mal" | "csv" = "mal";
-	let updateOnImport: boolean = false;
+	}> = $state(null);
+	let username: string = $state(null);
+	let mediaType: MediaType = $state(MediaType.ANIME);
+	let exportFormat: "mal" | "csv" = $state("mal");
+	let updateOnImport: boolean = $state(false);
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
@@ -61,7 +61,7 @@
 </svelte:head>
 
 <FeatureWrapper>
-	<Card.Root class="w-full max-w-lg overflow-hidden">
+	<Card.Root class="overflow-hidden">
 		<Card.Header>
 			<Card.Title>List Export</Card.Title>
 			<Card.Description class="text-card-foreground">
@@ -77,7 +77,7 @@
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
-						<Button variant="destructive" on:click={() => (calculatePromise = null)}>Reset</Button>
+						<Button variant="destructive" onclick={() => (calculatePromise = null)}>Reset</Button>
 					</div>
 				{/await}
 			{:else}
@@ -145,10 +145,10 @@
 		</Card.Content>
 		<Card.Footer>
 			{#if calculatePromise === null}
-				<Button on:click={calculate} disabled={!username}>Export</Button>
+				<Button onclick={calculate} disabled={!username}>Export</Button>
 			{:else}
 				<Button
-					on:click={() => {
+					onclick={() => {
 						username = null;
 						calculatePromise = null;
 					}}

@@ -1,8 +1,15 @@
 <script lang="ts">
+	import type { Snippet } from "svelte";
 	import * as Avatar from "$lib/components/ui/avatar";
 
-	export let name: string;
-	export let avatar: string;
+	interface Props {
+		name: string;
+		avatar: string;
+		actions: Snippet;
+		belowName: Snippet;
+	}
+
+	let { avatar, name, actions, belowName }: Props = $props();
 </script>
 
 <div class="flex items-center gap-4">
@@ -18,9 +25,9 @@
 		</a>
 		<div class="flex items-center justify-between">
 			<div class="flex gap-2">
-				<slot name="below-name" />
+				{@render belowName?.()}
 			</div>
-			<slot name="actions" />
+			{@render actions?.()}
 		</div>
 	</div>
 </div>

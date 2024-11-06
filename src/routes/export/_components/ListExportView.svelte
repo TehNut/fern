@@ -1,25 +1,28 @@
 <script lang="ts">
-	import { XMLBuilder } from "fast-xml-parser";
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
 	import Download from "lucide-svelte/icons/download";
-	import { fork } from "radash";
 	import { onMount } from "svelte";
-	import { MediaListStatus, MediaType, type FuzzyDate } from "$lib/anilist";
+	import { MediaType } from "$lib/anilist";
 	import UserHeader from "$lib/components/UserHeader.svelte";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
 	import type { ExportEntry, ExportUser } from "../+page.svelte";
 	import SkippedView from "./SkippedView.svelte";
 	import { createCSVExport, createMyAnimeListExport } from "../_exporters";
+	import { cn } from "$lib/utils";
 
-	export let entries: ExportEntry[];
-	export let user: ExportUser;
-	export let mediaType: MediaType;
-	export let updateOnImport: boolean;
-	export let exportFormat: "mal" | "csv";
+	interface Props {
+		entries: ExportEntry[];
+		user: ExportUser;
+		mediaType: MediaType;
+		updateOnImport: boolean;
+		exportFormat: "mal" | "csv";
+	}
+
+	let { entries, user, mediaType, updateOnImport, exportFormat }: Props = $props();
 
 	let exportedData: string = "";
-	let skippedEntries: ExportEntry[] = [];
+	let skippedEntries: ExportEntry[] = $state([]);
 
 	function createExport() {
 		switch (exportFormat) {
@@ -68,27 +71,31 @@
 
 <Collapsible.Root class="grid gap-4">
 	<UserHeader name={user.name} avatar={user.avatar.large}>
-		<div class="flex gap-2" slot="below-name">
-			{#if skippedEntries.length}
-				<p class="text-sm">
-					{skippedEntries.length} entries were skipped due to missing MAL mapping. Expand to view.
-				</p>
-			{/if}
-		</div>
-		<div class="flex gap-2" slot="actions">
-			<Button variant="ghost" size="icon" class="h-8 w-8" on:click={() => saveExport()}>
-				<Download />
-				<span class="sr-only">Download</span>
-			</Button>
-			{#if skippedEntries.length}
-				<Collapsible.Trigger asChild let:builder>
-					<Button builders={[builder]} variant="ghost" size="icon" class="h-8 w-8">
+		{#snippet belowName()}
+			<div class="flex gap-2">
+				{#if skippedEntries.length}
+					<p class="text-sm">
+						{skippedEntries.length} entries were skipped due to missing MAL mapping. Expand to view.
+					</p>
+				{/if}
+			</div>
+		{/snippet}
+		{#snippet actions()}
+			<div class="flex gap-2">
+				<Button variant="ghost" size="icon" class="h-8 w-8" onclick={() => saveExport()}>
+					<Download />
+					<span class="sr-only">Download</span>
+				</Button>
+				{#if skippedEntries.length}
+					<Collapsible.Trigger
+						class={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8")}
+					>
 						<ChevronsUpDown />
 						<span class="sr-only">Toggle</span>
-					</Button>
-				</Collapsible.Trigger>
-			{/if}
-		</div>
+					</Collapsible.Trigger>
+				{/if}
+			</div>
+		{/snippet}
 	</UserHeader>
 	<Collapsible.Content>
 		<SkippedView skipped={skippedEntries} />

@@ -6,7 +6,7 @@
 		ActivityMediaSearchDocument,
 		type ActivityMediaSearchQuery
 	} from "$lib/anilist";
-	import { cn } from "$lib/utils.js";
+	import { cn } from "$lib/utils";
 	import * as Command from "$lib/components/ui/command";
 	import { Button } from "$lib/components/ui/button";
 	import * as Popover from "$lib/components/ui/popover";
@@ -15,21 +15,31 @@
 
 	const debouncedSearch = debounce({ delay: 500 }, searchMedia);
 
-	export let value = "";
-	export let mediaType: MediaType;
+	interface Props {
+		value?: string;
+		mediaType: MediaType;
+	}
 
-	let open = false;
-	let searchValue = "";
-	let results: ActivityMediaSearchQuery["Page"]["media"] = [];
-	let fetchingResults = false;
+	let { value = $bindable(""), mediaType }: Props = $props();
 
-	$: selectedValue = results.find((e) => e.id === Number(value))?.title?.romaji || "Select a media";
-	$: searchValue && debouncedSearch();
+	let open = $state(false);
+	let searchValue = $state("");
+	let results: ActivityMediaSearchQuery["Page"]["media"] = $state([]);
+	let fetchingResults = $state(false);
+	let triggerRef = $state<HTMLButtonElement>(null!);
 
-	async function closeAndFocusTrigger(triggerId: string) {
+	$effect.pre(() => searchValue && debouncedSearch());
+
+	const selectedValue = $derived(results.find((e) => e.id === Number(value))?.title?.romaji);
+
+	// We want to refocus the trigger button when the user selects
+	// an item from the list so users can continue navigating the
+	// rest of the form with the keyboard.
+	function closeAndFocusTrigger() {
 		open = false;
-		await tick();
-		document.getElementById(triggerId)?.focus();
+		tick().then(() => {
+			triggerRef.focus();
+		});
 	}
 
 	async function searchMedia() {
@@ -54,42 +64,49 @@
 	}
 </script>
 
-<Popover.Root bind:open let:ids>
-	<Popover.Trigger asChild let:builder>
-		<Button
-			builders={[builder]}
-			variant="outline"
-			role="combobox"
-			aria-expanded={open}
-			class="w-full justify-between"
-		>
-			{selectedValue}
-			<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
-		</Button>
+<Popover.Root bind:open>
+	<Popover.Trigger bind:ref={triggerRef}>
+		{#snippet child({ props })}
+			<Button
+				variant="outline"
+				class="w-[200px] justify-between"
+				{...props}
+				role="combobox"
+				aria-expanded={open}
+			>
+				{selectedValue || "Select a media"}
+				<ChevronsUpDown class="ml-2 size-4 shrink-0 opacity-50" />
+			</Button>
+		{/snippet}
 	</Popover.Trigger>
 	<Popover.Content class="max-h-96 w-[400px] overflow-y-scroll p-0">
 		<Command.Root shouldFilter={false}>
 			<Command.Input placeholder="Search media..." bind:value={searchValue} />
-			<Command.Empty>No media found.</Command.Empty>
-			<Command.Group>
-				{#each results as result}
-					<Command.Item
-						class={cn("flex items-center gap-2", value === result.id.toString() && "bg-accent/80")}
-						value={result.id.toString()}
-						onSelect={(currentValue) => {
-							value = currentValue;
-							closeAndFocusTrigger(ids.trigger);
-						}}
-					>
-						<img
-							src={result.coverImage.large}
-							alt="Key visual"
-							class="bg-foreground-muted aspect-[2/3] w-14 flex-none rounded-md object-cover object-center"
-						/>
-						<p class="line-clamp-3 w-full">{result.title.romaji}</p>
-					</Command.Item>
-				{/each}
-			</Command.Group>
+			<Command.List>
+				<Command.Empty>No media found.</Command.Empty>
+				<Command.Group>
+					{#each results as result (result.id)}
+						<Command.Item
+							class={cn(
+								"flex items-center gap-2",
+								value === result.id.toString() && "bg-accent/80"
+							)}
+							value={result.id.toString()}
+							onSelect={() => {
+								value = result.id.toString();
+								closeAndFocusTrigger();
+							}}
+						>
+							<img
+								src={result.coverImage.large}
+								alt="Key visual"
+								class="bg-foreground-muted aspect-[2/3] w-14 flex-none rounded-md object-cover object-center"
+							/>
+							<p class="line-clamp-3 w-full">{result.title.romaji}</p>
+						</Command.Item>
+					{/each}
+				</Command.Group>
+			</Command.List>
 		</Command.Root>
 	</Popover.Content>
 </Popover.Root>

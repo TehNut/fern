@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import { MediaType, type InactiveMediaMlcQuery } from "$lib/anilist";
 
 	export type InactiveEntry =
@@ -24,9 +24,9 @@
 	let calculatePromise: Promise<{
 		entries: InactiveEntry[];
 		user: InactiveMediaUser;
-	}> = null;
-	let username: string = null;
-	let mediaType: MediaType = MediaType.ANIME;
+	}> = $state(null);
+	let username: string = $state(null);
+	let mediaType: MediaType = $state(MediaType.ANIME);
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
@@ -58,7 +58,7 @@
 </svelte:head>
 
 <FeatureWrapper>
-	<Card.Root class="w-full max-w-lg overflow-hidden">
+	<Card.Root class="overflow-hidden">
 		<Card.Header>
 			<Card.Title>Inactive Entries</Card.Title>
 			<Card.Description class="text-card-foreground">
@@ -74,7 +74,7 @@
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
-						<Button variant="destructive" on:click={() => (calculatePromise = null)}>Reset</Button>
+						<Button variant="destructive" onclick={() => (calculatePromise = null)}>Reset</Button>
 					</div>
 				{/await}
 			{:else}
@@ -116,10 +116,10 @@
 		</Card.Content>
 		<Card.Footer>
 			{#if calculatePromise === null}
-				<Button on:click={calculate} disabled={!username}>Calculate</Button>
+				<Button onclick={calculate} disabled={!username}>Calculate</Button>
 			{:else}
 				<Button
-					on:click={() => {
+					onclick={() => {
 						username = null;
 						calculatePromise = null;
 					}}

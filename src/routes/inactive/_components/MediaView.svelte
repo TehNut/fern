@@ -4,7 +4,11 @@
 	import { Badge } from "$lib/components/ui/badge";
 	import type { InactiveEntry } from "../+page.svelte";
 
-	export let entries: InactiveEntry[];
+	interface Props {
+		entries: InactiveEntry[];
+	}
+
+	let { entries }: Props = $props();
 </script>
 
 <VirtualList

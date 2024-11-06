@@ -1,4 +1,4 @@
-<script lang="ts" context="module">
+<script lang="ts" module>
 	import type { ActivitySearchQuery } from "$lib/anilist";
 
 	export type ListActivity = Extract<
@@ -22,7 +22,7 @@
 	} from "$lib/anilist";
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
 	import * as Alert from "$lib/components/ui/alert";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Card from "$lib/components/ui/card";
 	import { Input } from "$lib/components/ui/input";
 	import { Label } from "$lib/components/ui/label";
@@ -33,6 +33,7 @@
 	import { browser } from "$app/environment";
 	import MediaSearch from "./_components/MediaSearch.svelte";
 	import Switch from "$lib/components/ui/switch/switch.svelte";
+	import { cn } from "$lib/utils";
 
 	const rangeStart = today(getLocalTimeZone());
 	const rangeEnd = rangeStart;
@@ -44,16 +45,16 @@
 		activities: ListActivity[];
 		user: GetUserQuery["User"];
 		hasMore: boolean;
-	}> = null;
-	let username: string = null;
-	let mediaTypeIsManga = false;
-	let mediaId: string | undefined = undefined;
-	let selectionType: "time" | "media" = "time";
-	let value: DateRange | undefined = {
+	}> = $state(null);
+	let username: string = $state(null);
+	let mediaTypeIsManga = $state(false);
+	let mediaId = $state<string>("");
+	let selectionType = $state<"time" | "media">("time");
+	let value = $state<DateRange | undefined>({
 		start: rangeStart,
 		end: rangeEnd
-	};
-	let startValue: DateValue | undefined = undefined;
+	});
+	let startValue = $state<DateValue | undefined>(undefined);
 
 	async function calculate() {
 		calculatePromise = new Promise(async (resolve, reject) => {
@@ -101,7 +102,7 @@
 </svelte:head>
 
 <FeatureWrapper>
-	<Card.Root class="w-[1000px] max-w-lg overflow-hidden">
+	<Card.Root class="overflow-hidden">
 		<Card.Header>
 			<Card.Title>Activity History</Card.Title>
 			<Card.Description class="text-card-foreground"
@@ -123,7 +124,7 @@
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>
-						<Button variant="destructive" on:click={() => (calculatePromise = null)}>Reset</Button>
+						<Button variant="destructive" onclick={() => (calculatePromise = null)}>Reset</Button>
 					</div>
 				{/await}
 			{:else}
@@ -162,23 +163,21 @@
 								<div class="flex flex-col space-y-1">
 									<Label>Activity Date Range</Label>
 									<Popover.Root>
-										<Popover.Trigger asChild let:builder>
-											<Button builders={[builder]} variant="outline" class="w-full">
-												<Calendar class="mr-2 size-4" />
-												{#if value && value.start}
-													{#if value.end && value.start.compare(value.end) !== 0}
-														{df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(
-															value.end.toDate(getLocalTimeZone())
-														)}
-													{:else}
-														{df.format(value.start.toDate(getLocalTimeZone()))}
-													{/if}
-												{:else if startValue}
-													{df.format(startValue.toDate(getLocalTimeZone()))}
+										<Popover.Trigger class={cn(buttonVariants({ variant: "outline" }), "w-full")}>
+											<Calendar class="mr-2 size-4" />
+											{#if value && value.start}
+												{#if value.end && value.start.compare(value.end) !== 0}
+													{df.format(value.start.toDate(getLocalTimeZone()))} - {df.format(
+														value.end.toDate(getLocalTimeZone())
+													)}
 												{:else}
-													Pick a date
+													{df.format(value.start.toDate(getLocalTimeZone()))}
 												{/if}
-											</Button>
+											{:else if startValue}
+												{df.format(startValue.toDate(getLocalTimeZone()))}
+											{:else}
+												Pick a date
+											{/if}
 										</Popover.Trigger>
 										<Popover.Content side="top">
 											<RangeCalendar bind:value />
@@ -212,10 +211,10 @@
 		</Card.Content>
 		<Card.Footer>
 			{#if calculatePromise === null}
-				<Button on:click={calculate} disabled={!username}>Search</Button>
+				<Button onclick={calculate} disabled={!username}>Search</Button>
 			{:else}
 				<Button
-					on:click={() => {
+					onclick={() => {
 						username = null;
 						calculatePromise = null;
 					}}

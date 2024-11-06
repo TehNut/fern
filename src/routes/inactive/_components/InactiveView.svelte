@@ -2,16 +2,21 @@
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
 	import { MediaListStatus } from "$lib/anilist";
 	import UserHeader from "$lib/components/UserHeader.svelte";
-	import { Button } from "$lib/components/ui/button";
+	import { buttonVariants } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
 	import { Label } from "$lib/components/ui/label";
 	import * as Select from "$lib/components/ui/select";
 	import * as ToggleGroup from "$lib/components/ui/toggle-group";
 	import type { InactiveEntry, InactiveMediaUser } from "../+page.svelte";
 	import MediaView from "./MediaView.svelte";
+	import { cn } from "$lib/utils";
 
-	export let entries: InactiveEntry[];
-	export let user: InactiveMediaUser;
+	interface Props {
+		entries: InactiveEntry[];
+		user: InactiveMediaUser;
+	}
+
+	let { entries, user }: Props = $props();
 
 	const inactiveCutoffSelections = [
 		{ value: "1m", label: "1 month" },
@@ -22,22 +27,18 @@
 		{ value: "2y", label: "2 years" }
 	];
 
-	let inactiveCutoff: (typeof inactiveCutoffSelections)[0] = inactiveCutoffSelections[3];
-	let includeStatus: MediaListStatus[] = [
+	let inactiveCutoff: (typeof inactiveCutoffSelections)[number]["value"] = $state("3m");
+	let includeStatus: MediaListStatus[] = $state([
 		MediaListStatus.CURRENT,
 		MediaListStatus.REPEATING,
 		MediaListStatus.PAUSED
-	];
-
-	$: inactiveEntries = entries
-		.filter(
-			(e) => Date.now() - new Date(e.updatedAt * 1000).getTime() > getInactiveOffset(inactiveCutoff)
-		)
-		.filter((e) => includeStatus.includes(e.status))
-		.sort((a, b) => a.updatedAt - b.updatedAt);
+	]);
+	let triggerContent = $derived(
+		inactiveCutoffSelections.find((e) => e.value === inactiveCutoff)?.label ?? "Select a cutoff"
+	);
 
 	function getInactiveOffset(cutoff: typeof inactiveCutoff) {
-		switch (cutoff.value) {
+		switch (cutoff) {
 			case "1m":
 				return 30 * 24 * 60 * 60 * 1000;
 			case "2m":
@@ -56,21 +57,28 @@
 	function onChooseCutoff(value: unknown) {
 		inactiveCutoff = value as typeof inactiveCutoff;
 	}
+	let inactiveEntries = $derived(
+		entries
+			.filter(
+				(e) =>
+					Date.now() - new Date(e.updatedAt * 1000).getTime() > getInactiveOffset(inactiveCutoff)
+			)
+			.filter((e) => includeStatus.includes(e.status))
+			.sort((a, b) => a.updatedAt - b.updatedAt)
+	);
 </script>
 
 <Collapsible.Root class="grid gap-4">
 	<div class="flex flex-col space-y-1">
 		<Label for="mediaType">Inactive Time</Label>
-		<Select.Root bind:selected={inactiveCutoff} items={inactiveCutoffSelections}>
+		<Select.Root type="single" bind:value={inactiveCutoff} items={inactiveCutoffSelections}>
 			<Select.Trigger class="w-full">
-				<Select.Value let:selected>
-					{selected.label}
-				</Select.Value>
+				{triggerContent}
 			</Select.Trigger>
 			<Select.Content class="w-full">
 				<Select.Group>
 					{#each inactiveCutoffSelections as { value, label }}
-						<Select.Item {value} on:click={onChooseCutoff}>{label}</Select.Item>
+						<Select.Item {value} {label}>{label}</Select.Item>
 					{/each}
 				</Select.Group>
 			</Select.Content>
@@ -86,17 +94,20 @@
 		</ToggleGroup.Root>
 	</div>
 	<UserHeader name={user.name} avatar={user.avatar.large}>
-		<div class="flex gap-2" slot="below-name">
-			{inactiveEntries.length} inactive entries
-		</div>
-		<svelte:fragment slot="actions">
-			<Collapsible.Trigger asChild let:builder>
-				<Button builders={[builder]} variant="ghost" size="icon" class="h-8 w-8">
-					<ChevronsUpDown />
-					<span class="sr-only">Toggle</span>
-				</Button>
+		<!-- @migration-task: migrate this slot by hand, `below-name` is an invalid identifier -->
+		{#snippet belowName()}
+			<div class="flex gap-2">
+				{inactiveEntries.length} inactive entries
+			</div>
+		{/snippet}
+		{#snippet actions()}
+			<Collapsible.Trigger
+				class={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8")}
+			>
+				<ChevronsUpDown />
+				<span class="sr-only">Toggle</span>
 			</Collapsible.Trigger>
-		</svelte:fragment>
+		{/snippet}
 	</UserHeader>
 	<Collapsible.Content>
 		<MediaView entries={inactiveEntries} />

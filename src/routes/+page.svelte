@@ -35,7 +35,7 @@
 	<title>Fern | Spellbook</title>
 </svelte:head>
 
-<div class="mx-auto flex w-11/12 flex-col gap-4 xl:w-2/3">
+<div class="flex w-full flex-col gap-4 lg:mx-auto lg:w-11/12 xl:w-2/3">
 	<h1 class="text-2xl font-medium">Features</h1>
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
 		{#each features as { name, path, description, isNew }}

@@ -2,7 +2,11 @@
 	import VirtualList from "svelte-tiny-virtual-list";
 	import type { ExportEntry } from "../+page.svelte";
 
-	export let skipped: ExportEntry[];
+	interface Props {
+		skipped: ExportEntry[];
+	}
+
+	let { skipped }: Props = $props();
 </script>
 
 <div class="grid gap-2">

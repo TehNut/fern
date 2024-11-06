@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { DateFormatter, endOfMonth, getLocalTimeZone } from "@internationalized/date";
+	import { DateFormatter, getLocalTimeZone } from "@internationalized/date";
 	import type { DateRange } from "bits-ui";
 	import request from "graphql-request";
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
@@ -14,15 +14,26 @@
 		type GetUserQuery
 	} from "$lib/anilist";
 	import UserHeader from "$lib/components/UserHeader.svelte";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
 	import type { ListActivity } from "../+page.svelte";
+	import { cn } from "$lib/utils";
 
-	export let activities: ListActivity[];
-	export let user: GetUserQuery["User"];
-	export let value: DateRange;
-	export let hasMore = true;
-	export let mediaId: string | undefined = undefined;
+	interface Props {
+		activities: ListActivity[];
+		user: GetUserQuery["User"];
+		value: DateRange;
+		hasMore?: boolean;
+		mediaId?: string | undefined;
+	}
+
+	let {
+		activities = $bindable(),
+		user,
+		value,
+		hasMore = $bindable(true),
+		mediaId = undefined
+	}: Props = $props();
 
 	const df = new DateFormatter((browser && navigator.languages[0]) || "en-US", {
 		dateStyle: "short"
@@ -33,7 +44,7 @@
 	});
 
 	let page = 1;
-	let isLoading = false;
+	let isLoading = $state(false);
 
 	async function loadMore() {
 		if (!hasMore) return;
@@ -70,32 +81,34 @@
 
 <Collapsible.Root class="grid gap-4">
 	<UserHeader name={user.name} avatar={user.avatar.large}>
-		<div class="flex gap-2" slot="below-name">
-			{#if value}
-				{#if value.start.compare(value.end) === 0}
-					These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
-					on
-					{df.format(value.start.toDate(getLocalTimeZone()))}.
+		{#snippet belowName()}
+			<div class="flex gap-2">
+				{#if value}
+					{#if value.start.compare(value.end) === 0}
+						These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
+						on
+						{df.format(value.start.toDate(getLocalTimeZone()))}.
+					{:else}
+						These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
+						between
+						{df.format(value.start.toDate(getLocalTimeZone()))}
+						and
+						{df.format(value.end.toDate(getLocalTimeZone()))}.
+					{/if}
 				{:else}
 					These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created
-					between
-					{df.format(value.start.toDate(getLocalTimeZone()))}
-					and
-					{df.format(value.end.toDate(getLocalTimeZone()))}.
+					for this media.
 				{/if}
-			{:else}
-				These {activities.length}{activities.length % 50 === 0 ? `+` : ""} activities were created for
-				this media.
-			{/if}
-		</div>
-		<svelte:fragment slot="actions">
-			<Collapsible.Trigger asChild let:builder>
-				<Button builders={[builder]} variant="ghost" size="icon" class="h-8 w-8">
-					<ChevronsUpDown />
-					<span class="sr-only">Toggle</span>
-				</Button>
+			</div>
+		{/snippet}
+		{#snippet actions()}
+			<Collapsible.Trigger
+				class={cn(buttonVariants({ variant: "ghost", size: "icon" }), "h-8 w-8")}
+			>
+				<ChevronsUpDown />
+				<span class="sr-only">Toggle</span>
 			</Collapsible.Trigger>
-		</svelte:fragment>
+		{/snippet}
 	</UserHeader>
 	<Collapsible.Content>
 		<VirtualList
@@ -149,7 +162,7 @@
 					</div>
 				{:else}
 					<div class="flex h-full w-full items-center justify-center">
-						<Button on:click={loadMore} disabled={isLoading}>Load More</Button>
+						<Button onclick={loadMore} disabled={isLoading}>Load More</Button>
 					</div>
 				{/if}
 			</div>
