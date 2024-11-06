@@ -34,6 +34,7 @@
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
 	import { RepeatlessWatchTimeMlcDocument } from "$lib/anilist";
 	import { Repeat } from "lucide-svelte";
+	import MetaTags from "$lib/components/MetaTags.svelte";
 
 	let calculatePromise: Promise<{
 		calculated: CalculatedReponse;
@@ -100,9 +101,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Fern | Repeatless Watch Time</title>
-</svelte:head>
+<MetaTags title="Repeatless Watch Time" />
 
 <FeatureWrapper>
 	<Card.Root class="overflow-hidden">

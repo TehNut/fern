@@ -34,6 +34,7 @@
 	import MediaSearch from "./_components/MediaSearch.svelte";
 	import Switch from "$lib/components/ui/switch/switch.svelte";
 	import { cn } from "$lib/utils";
+	import MetaTags from "$lib/components/MetaTags.svelte";
 
 	const rangeStart = today(getLocalTimeZone());
 	const rangeEnd = rangeStart;
@@ -97,9 +98,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Fern | Activity History</title>
-</svelte:head>
+<MetaTags title="Activity History" />
 
 <FeatureWrapper>
 	<Card.Root class="overflow-hidden">

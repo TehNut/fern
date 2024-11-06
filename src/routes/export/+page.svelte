@@ -20,6 +20,7 @@
 	import * as Tabs from "$lib/components/ui/tabs";
 	import { unique } from "radash";
 	import ListExportView from "./_components/ListExportView.svelte";
+	import MetaTags from "$lib/components/MetaTags.svelte";
 
 	let calculatePromise: Promise<{
 		user: ExportUser;
@@ -56,9 +57,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Fern | List Export</title>
-</svelte:head>
+<MetaTags title="List Export" />
 
 <FeatureWrapper>
 	<Card.Root class="overflow-hidden">

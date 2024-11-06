@@ -1,6 +1,7 @@
 <script lang="ts">
 	import * as Card from "$lib/components/ui/card";
 	import { Badge } from "$lib/components/ui/badge";
+	import MetaTags from "$lib/components/MetaTags.svelte";
 
 	const features = [
 		{
@@ -31,12 +32,10 @@
 	];
 </script>
 
-<svelte:head>
-	<title>Fern | Spellbook</title>
-</svelte:head>
+<MetaTags title="Spellbook" />
 
 <div class="flex w-full flex-col gap-4 lg:mx-auto lg:w-11/12 xl:w-2/3">
-	<h1 class="text-2xl font-medium">Features</h1>
+	<h1 class="ml-4 text-2xl font-medium">Features</h1>
 	<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
 		{#each features as { name, path, description, isNew }}
 			<a href={path}>

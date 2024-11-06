@@ -2,6 +2,7 @@
 	import { ModeWatcher } from "mode-watcher";
 	import { Toaster } from "$lib/components/ui/sonner";
 	import "../app.css";
+
 	/** @type {{children?: import('svelte').Snippet}} */
 	let { children } = $props();
 </script>

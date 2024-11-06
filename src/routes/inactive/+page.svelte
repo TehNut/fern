@@ -20,6 +20,7 @@
 	import * as Tabs from "$lib/components/ui/tabs";
 	import FeatureWrapper from "$lib/components/FeatureWrapper.svelte";
 	import InactiveView from "./_components/InactiveView.svelte";
+	import MetaTags from "$lib/components/MetaTags.svelte";
 
 	let calculatePromise: Promise<{
 		entries: InactiveEntry[];
@@ -53,9 +54,7 @@
 	}
 </script>
 
-<svelte:head>
-	<title>Fern | Inactive Entries</title>
-</svelte:head>
+<MetaTags title="Inactive Entries" />
 
 <FeatureWrapper>
 	<Card.Root class="overflow-hidden">
