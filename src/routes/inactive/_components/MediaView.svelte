@@ -3,12 +3,14 @@
 	import { parseSeconds, readableTime } from "$lib/time";
 	import { Badge } from "$lib/components/ui/badge";
 	import type { InactiveEntry } from "../+page.svelte";
+	import type { MediaType } from "$lib/anilist";
 
 	interface Props {
 		entries: InactiveEntry[];
+		mediaType: MediaType;
 	}
 
-	let { entries }: Props = $props();
+	let { entries, mediaType }: Props = $props();
 </script>
 
 <VirtualList
@@ -31,7 +33,7 @@
 			/>
 			<div class="flex flex-1 flex-col gap-2">
 				<a
-					href="https://anilist.co/anime/{media.id}"
+					href="https://anilist.co/{mediaType.toLowerCase()}/{media.id}"
 					target="_blank"
 					class="line-clamp-2 text-lg font-medium"
 				>

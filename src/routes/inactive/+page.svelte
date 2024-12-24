@@ -69,7 +69,7 @@
 				{#await calculatePromise}
 					Calculating...
 				{:then { entries, user }}
-					<InactiveView {entries} {user} />
+					<InactiveView {entries} {user} {mediaType} />
 				{:catch}
 					<div class="grid w-full items-center gap-4">
 						<p>Uh-oh :(</p>

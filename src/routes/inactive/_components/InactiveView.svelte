@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ChevronsUpDown from "lucide-svelte/icons/chevrons-up-down";
-	import { MediaListStatus } from "$lib/anilist";
+	import { MediaListStatus, MediaType } from "$lib/anilist";
 	import UserHeader from "$lib/components/UserHeader.svelte";
 	import { buttonVariants } from "$lib/components/ui/button";
 	import * as Collapsible from "$lib/components/ui/collapsible";
@@ -14,9 +14,10 @@
 	interface Props {
 		entries: InactiveEntry[];
 		user: InactiveMediaUser;
+		mediaType: MediaType;
 	}
 
-	let { entries, user }: Props = $props();
+	let { entries, user, mediaType }: Props = $props();
 
 	const inactiveCutoffSelections = [
 		{ value: "1m", label: "1 month" },
@@ -54,9 +55,6 @@
 		}
 	}
 
-	function onChooseCutoff(value: unknown) {
-		inactiveCutoff = value as typeof inactiveCutoff;
-	}
 	let inactiveEntries = $derived(
 		entries
 			.filter(
@@ -110,6 +108,6 @@
 		{/snippet}
 	</UserHeader>
 	<Collapsible.Content>
-		<MediaView entries={inactiveEntries} />
+		<MediaView entries={inactiveEntries} {mediaType} />
 	</Collapsible.Content>
 </Collapsible.Root>
