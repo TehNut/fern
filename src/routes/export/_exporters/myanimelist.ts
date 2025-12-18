@@ -104,6 +104,8 @@ export function createMyAnimeListExport(entries: ExportEntry[], user: ExportUser
 				`https://anilist.co/${mediaType.toLowerCase()}/${e.media.id}: ${e.media.title.romaji}`
 		);
 		exportedData += `  Missing MAL mappings:\n\n  - ${skippedText.join("\n  - ")}\n-->\n\n`;
+	} else {
+		exportedData += "-->\n\n";
 	}
 	exportedData += xml.build(exportData);
 
